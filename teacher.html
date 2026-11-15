@@ -49,22 +49,19 @@
   </style>
 </head>
 <body>
-  <!-- 선생님 비밀번호 확인창 -->
   <div class="lock-box" id="lockScreen">
     <h2>👩‍🏫 선생님 전용 화면</h2>
     <p style="color:#64748b;">비밀번호를 입력하세요 (초기: 1234)</p>
     <input type="password" id="pwInput" placeholder="비밀번호" onkeyup="if(event.key==='Enter') unlock()">
     <br>
-    <button class="btn-end" onclick="unlock()">입장하기</button>
+    <button type="button" class="btn-end" onclick="unlock()">입장하기</button>
   </div>
 
-  <!-- 메인 제어판 -->
   <div class="container" id="mainScreen" style="display:none;">
     <div class="badge" id="typeBadge">🌳 숲속 수학 교실</div>
     <div class="question-box">
       <div class="q-text" id="qDisplay">친구들이 입장할 때까지 기다려요!</div>
       
-      <!-- 학생 입장용 QR코드 자동 표시 영역 -->
       <div id="qrBox" class="qr-area">
         <img id="qrImg" src="" alt="학생 입장 QR코드" width="160" height="160"><br>
         <span style="font-size:16px; color:#475569;">📱 스마트폰으로 QR코드를 찍어 입장하세요!</span>
@@ -75,10 +72,10 @@
     </div>
 
     <div class="controls">
-      <button class="btn-next" onclick="nextQuestion()">다음 문제 내기 ▶</button>
-      <button class="btn-hint" onclick="toggleHint()">💡 10 만들기 힌트</button>
-      <button class="btn-end" onclick="endGame()">🏆 결과 발표</button>
-      <button class="btn-reset" onclick="resetGame()">기록 초기화</button>
+      <button type="button" class="btn-next" onclick="nextQuestion()">다음 문제 내기 ▶</button>
+      <button type="button" class="btn-hint" onclick="toggleHint()">💡 10 만들기 힌트</button>
+      <button type="button" class="btn-end" onclick="endGame()">🏆 결과 발표</button>
+      <button type="button" class="btn-reset" onclick="resetGame()">기록 초기화</button>
     </div>
 
     <div class="board">
@@ -99,9 +96,9 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'epkyysfmcduadfyayvgw';
+    const SUPABASE_URL = 'https://epkyysfmcduadfyayvgw.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_64ZrDSViYYebzwQ0uOKWlg_XxCvlpcn';
-    const TEACHER_PW = '1234'; // 원하는 비밀번호로 변경 가능
+    const TEACHER_PW = '1234';
     const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const quizzes = [
@@ -120,9 +117,8 @@
         document.getElementById('lockScreen').style.display = 'none';
         document.getElementById('mainScreen').style.display = 'block';
         
-        // 현재 사이트의 학생용 기본 주소로 QR코드 자동 생성
         const studentUrl = window.location.origin + '/';
-        document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(studentUrl)}`;
+        document.getElementById('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(studentUrl);
         
         setInterval(load, 1500);
         load();
@@ -143,7 +139,10 @@
 
     function nextQuestion() {
       const nextIdx = (roomData.status === 'WAITING') ? 0 : roomData.qIndex + 1;
-      if (nextIdx >= quizzes.length) return alert("마지막 문제까지 모두 풀었어요! 결과 발표를 눌러주세요 🎉");
+      if (nextIdx >= quizzes.length) {
+        alert("마지막 문제까지 모두 풀었어요! 결과 발표를 눌러주세요 🎉");
+        return;
+      }
       roomData.status = 'PLAYING';
       roomData.qIndex = nextIdx;
       roomData.showHint = false;
@@ -209,7 +208,7 @@
         hintBox.style.display = 'none';
       } else if (roomData.status === 'PLAYING') {
         const cur = quizzes[roomData.qIndex];
-        badge.innerText = `문제 ${roomData.qIndex + 1} / ${quizzes.length} (${cur.type})`;
+        badge.innerText = "문제 " + (roomData.qIndex + 1) + " / " + quizzes.length + " (" + cur.type + ")";
         qDisplay.innerText = cur.q;
         qrBox.style.display = 'none';
         drawTenFrames(cur);
@@ -227,7 +226,7 @@
       const entries = Object.entries(roomData.students || {}).sort((a, b) => b[1].score - a[1].score);
       tbody.innerHTML = entries.length ? entries.map(([nickname, info], idx) => `
         <tr>
-          <td>${idx === 0 && info.score > 0 ? '👑 1위' : `${idx + 1}위`}</td>
+          <td>${idx === 0 && info.score > 0 ? '👑 1위' : (idx + 1) + '위'}</td>
           <td><strong>${info.avatar || '🐰'} ${nickname}</strong></td>
           <td>${info.correctCount || 0} / ${quizzes.length}개</td>
           <td style="color:#16a34a; font-weight:bold;">${info.score}점</td>
